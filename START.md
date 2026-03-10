@@ -5,43 +5,72 @@ Simplified pipeline: PDF → images → LLM vision extraction → agent review.
 
 ## Quick Start (Windows)
 
+### First time — run once:
+
+```cmd
+setup.bat
+```
+
+This will:
+- Check Python is installed
+- Download portable Node.js if not installed (no admin required)
+- Create Python venv and install backend dependencies
+- Install frontend npm dependencies
+- Create `.env` file from template
+
+After setup, **edit `backend\.env`** with your proxy URL and API key.
+
+### Run the app:
+
+```cmd
+start.bat
+```
+
+This launches both backend and frontend in separate windows.
+- Backend: http://localhost:8002
+- Frontend: http://localhost:3000
+
+### If behind a corporate proxy:
+
+Set these **before** running `setup.bat`:
+
+```cmd
+set HTTP_PROXY=http://your-proxy:port
+set HTTPS_PROXY=http://your-proxy:port
+npm config set proxy http://your-proxy:port
+npm config set https-proxy http://your-proxy:port
+```
+
+## Manual Setup (if scripts don't work)
+
 ### 1. Backend
 
 ```cmd
-cd app\backend
-
-:: Create virtual environment
+cd backend
 python -m venv .venv
 .venv\Scripts\activate
-
-:: Install dependencies
 pip install -r requirements.txt
-
-:: Configure
 copy .env.example .env
-:: Edit .env with your proxy URL and API key
-
-:: Run
+:: Edit .env with your API key
 python main.py
 ```
-
-Backend will start on http://localhost:8002
 
 ### 2. Frontend
 
 ```cmd
-cd app\frontend
-
-:: Install dependencies
+cd frontend
 npm install
-
-:: Run
 npm run dev
 ```
 
-Frontend will start on http://localhost:3000
+If `npm` is not found, download the portable zip from https://nodejs.org/en/download
+and extract it. Then add it to PATH:
 
-### 3. Use
+```cmd
+set PATH=C:\path\to\extracted\node;%PATH%
+```
+
+## Use
 
 1. Open http://localhost:3000
 2. Upload a PDF (financial statements, 3-5 pages)
@@ -69,12 +98,3 @@ Pipeline (3 stages):
 1. **Render**: pymupdf converts PDF pages to PNG
 2. **Extract**: LLM vision reads all pages, extracts 20 financial fields as JSON
 3. **Agent Review**: ADK agent with LiteLlm verifies arithmetic (GP, PBT, net profit, balance sheet)
-
-## What this tests
-
-- pymupdf on Windows (file paths, image rendering)
-- OpenAI SDK → enterprise proxy (chat completions, vision, JSON mode)
-- ADK LlmAgent + LiteLlm + tool calling through proxy
-- SQLite database on Windows
-- FastAPI + Next.js full stack on Windows
-- Background thread pipeline execution
